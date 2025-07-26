@@ -1,65 +1,88 @@
-# django-commands README
+# Django Commands
 
-This is the README for your extension "django-commands". After writing up a brief description, we recommend including the following sections.
-
-## Features
-
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
-
-For example if there is an image subfolder under your extension project workspace:
-
-\!\[feature X\]\(images/feature-x.png\)
-
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
-
-## Requirements
-
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
-
-## Extension Settings
-
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
-
-For example:
-
-This extension contributes the following settings:
-
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
-
-## Known Issues
-
-Calling out known issues can help limit users opening duplicate issues against your extension.
-
-## Release Notes
-
-Users appreciate release notes as you update your extension.
-
-### 1.0.0
-
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
+Quickly discover and run Django management commands in Visual Studio Code — with recent command history, argument prompts, and integrated terminal or debugger support.
 
 ---
 
-## Working with Markdown
+## ✨ Features
 
-You can author your README using Visual Studio Code.  Here are some useful editor keyboard shortcuts:
+-   🧠 Parses and groups Django commands by category
+-   🕹️ Runs commands in a VS Code terminal (with argument input)
+-   🧪 Debugs Django commands using the Python debugger
+-   🕘 Keeps track of recently used commands (configurable limit)
+-   ⚙️ Uses your selected Python interpreter from the Python extension
+-   🧵 Terminal reuse or always-new terminal behavior (configurable)
 
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux)
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux)
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets
+---
 
-## For more information
+## 🔧 Extension Settings
 
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
+This extension contributes the following settings:
 
-**Enjoy!**
+| Setting                                | Type      | Default | Description                                                             |
+| -------------------------------------- | --------- | ------- | ----------------------------------------------------------------------- |
+| `djangoCommands.maxRecentCommands`     | `number`  | `5`     | Maximum number of recent Django commands to store (min: `1`, max: `15`) |
+| `djangoCommands.showRecentCommands`    | `boolean` | `true`  | Show recently used Django commands at the top of the command picker     |
+| `djangoCommands.alwaysOpenNewTerminal` | `boolean` | `false` | Always open a new terminal window instead of reusing the current one    |
+
+---
+
+## ⚙️ Requirements
+
+-   [Python extension](https://marketplace.visualstudio.com/items?itemName=ms-python.python) must be installed and enabled
+-   An active Python environment selected in VS Code
+-   A `manage.py` Django project file accessible from you working directory
+
+---
+
+## 🔧 Extension Settings
+
+This extension contributes the following settings:
+
+| Setting                                | Type      | Default | Description                                                  |
+| -------------------------------------- | --------- | ------- | ------------------------------------------------------------ |
+| `djangoCommands.maxRecentCommands`     | `number`  | `5`     | Number of recent Django commands to keep                     |
+| `djangoCommands.showRecentCommands`    | `boolean` | `true`  | Show recent commands at the top of the picker                |
+| `djangoCommands.alwaysOpenNewTerminal` | `boolean` | `true`  | Always use a new terminal instead of reusing the current one |
+
+You can change these in `settings.json` or via the VS Code Settings UI.
+
+---
+
+## 🚀 Commands
+
+You can access the following from the Command Palette (`Ctrl+Shift+P` or `Cmd+Shift+P`):
+
+-   `Django Commands: Run` – Run a Django command with optional arguments
+-   `Django Commands: Debug` – Launch Django command with Python debugger
+-   `Django Commands: Reload` – Refresh command list and clear recent history
+
+---
+
+## 📝 Release Notes
+
+### 1.0.0
+
+-   Initial release:
+    -   Command grouping
+    -   Terminal execution
+    -   Debug mode
+    -   Recent command tracking
+    -   Configurable settings
+
+---
+
+## 🙌 Contributing
+
+Pull requests and feedback welcome! Submit issues or feature suggestions via [Github](https://github.com/stecik/vscode_django_commands).
+
+---
+
+## 💡 Tips
+
+-   Use recent commands to quickly re-run common tasks
+-   Use the debugger when inspecting issues with management commands
+
+---
+
+**Enjoy using Django Commands!**

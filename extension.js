@@ -5,6 +5,10 @@ const vscode = require("vscode");
 const fs = require("fs");
 const { exec } = require("child_process");
 const path = require("path");
+const config = vscode.workspace.getConfiguration("djangoCommands");
+const maxRecent = config.get("maxRecentCommands", 5);
+const showRecent = config.get("showRecentCommands", true);
+const openNewTerminal = config.get("alwaysOpenNewTerminal", true);
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -17,6 +21,7 @@ let workingDir;
 let pythonInterpreter;
 let managePy;
 let commands;
+let recentCommands;
 
 function parseDjangoCommands(text) {
     text = text.slice(text.indexOf("["));
@@ -34,6 +39,7 @@ function parseDjangoCommands(text) {
             result[currentGroup].push(line);
         }
     }
+    console.log(result);
     return result;
 }
 
@@ -52,21 +58,39 @@ async function getPythonInterpreter() {
     const pythonAPI = pythonExt.exports;
     const interpreterPath =
         pythonAPI.environments.getActiveEnvironmentPath().path;
-
-    vscode.window.showInformationMessage(
-        `Python interpreter: ${interpreterPath}`
-    );
     return interpreterPath;
 }
 
-function getManagePy() {
-    return path.join(workingDir, "manage.py");
+async function findManagePy() {
+    const files = await vscode.workspace.findFiles(
+        "**/manage.py",
+        "**/node_modules/**",
+        1
+    );
+    if (files.length === 0) {
+        vscode.window.showErrorMessage("No manage.py found in workspace.");
+        return;
+    }
+    return files[0].fsPath;
 }
 
 async function showDjangoCommandPicker() {
     const items = [];
 
-    // NOTE: destructure so we don't shadow `commands`
+    // add recent commands
+    if (showRecent) {
+        items.push({
+            label: `── RECENT ──`,
+            kind: vscode.QuickPickItemKind.Separator,
+        });
+        for (const cmd of [...recentCommands].reverse()) {
+            items.push({
+                label: cmd,
+                description: "recent",
+            });
+        }
+    }
+
     for (const [group, cmds] of Object.entries(commands)) {
         items.push({
             label: `── ${group.toUpperCase()} ──`,
@@ -90,7 +114,10 @@ async function showDjangoCommandPicker() {
         : null;
 }
 
-function getDjangoCommands() {
+async function getDjangoCommands() {
+    if (!fs.existsSync(managePy)) {
+        managePy = await findManagePy();
+    }
     return new Promise((resolve, reject) => {
         if (!pythonInterpreter) {
             return reject(new Error("No Python interpreter"));
@@ -108,49 +135,108 @@ function getDjangoCommands() {
     });
 }
 
-async function run() {
+function addRecentCommand(cmd, context) {
+    recentCommands.delete(cmd);
+    recentCommands.add(cmd);
+
+    if (recentCommands.size > maxRecent) {
+        recentCommands.delete(recentCommands.values().next().value);
+    }
+    context.globalState.update("recentCommands", [...recentCommands]);
+}
+
+async function run(context) {
+    if (!fs.existsSync(managePy)) {
+        managePy = await findManagePy();
+    }
+    let term;
+    if (!openNewTerminal) {
+        term = vscode.window.activeTerminal;
+    }
+    if (!term) {
+        term = vscode.window.createTerminal({
+            name: "Django Commands",
+            location: {
+                viewColumn: vscode.ViewColumn.Beside,
+                preserveFocus: true,
+            },
+            hideFromUser: true,
+        });
+    }
+    const cmd = await showDjangoCommandPicker();
+    if (!cmd) {
+        term.dispose();
+        return;
+    }
+    addRecentCommand(cmd, context);
+    const args = await vscode.window.showInputBox({
+        prompt: `Arguments for: ${cmd}`,
+        placeHolder: "Enter arguments",
+        ignoreFocusOut: true,
+    });
+    term.show();
+    term.sendText(`${pythonInterpreter} ${managePy} ${cmd} ${args || ""}`);
+}
+
+async function debug(context) {
+    if (!fs.existsSync(managePy)) {
+        managePy = await findManagePy();
+    }
     const cmd = await showDjangoCommandPicker();
     if (!cmd) {
         return;
     }
-    const term = vscode.window.createTerminal(`Django: ${cmd}`);
-    term.show();
-    term.sendText(`${pythonInterpreter} ${managePy} ${cmd}`);
-}
-
-async function debug() {
-    const cmd = await showDjangoCommandPicker();
-    if (!cmd) {
-        return;
+    addRecentCommand(cmd, context);
+    let args = await vscode.window.showInputBox({
+        prompt: `Arguments for: ${cmd}`,
+        placeHolder: "Enter arguments",
+    });
+    if (args) {
+        args = args.split(" ");
     }
     await vscode.debug.startDebugging(undefined, {
         name: `Django: ${cmd}`,
         type: "python",
         request: "launch",
         program: managePy,
-        args: [cmd],
+        args: [cmd, ...args],
         console: "integratedTerminal",
         cwd: workingDir,
     });
 }
 
-async function reload() {
+async function reload(context) {
+    if (!fs.existsSync(managePy)) {
+        managePy = await findManagePy();
+    }
     commands = await getDjangoCommands();
+    context.globalState.update("recentCommands", []);
+    recentCommands = new Set();
 }
 
 async function activate(context) {
+    recentCommands = new Set(context.globalState.get("recentCommands", []));
     workingDir = vscode.workspace.workspaceFolders[0].uri.fsPath;
     pythonInterpreter = await getPythonInterpreter();
-    managePy = getManagePy();
+    managePy = await findManagePy();
+    if (!managePy) {
+        return;
+    }
     commands = await getDjangoCommands();
 
-    let cmd = vscode.commands.registerCommand("django-commands.run", run);
+    let cmd = vscode.commands.registerCommand("django-commands.run", () => {
+        run(context);
+    });
     context.subscriptions.push(cmd);
 
-    cmd = vscode.commands.registerCommand("django-commands.debug", debug);
+    cmd = vscode.commands.registerCommand("django-commands.debug", () => {
+        debug(context);
+    });
     context.subscriptions.push(cmd);
 
-    cmd = vscode.commands.registerCommand("django-commands.reload", reload);
+    cmd = vscode.commands.registerCommand("django-commands.reload", () => {
+        reload(context);
+    });
     context.subscriptions.push(cmd);
 }
 

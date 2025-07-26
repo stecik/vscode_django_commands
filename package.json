@@ -2,7 +2,12 @@
   "name": "django-commands",
   "displayName": "Django Commands",
   "description": "Extension to easily run and debug django commands",
+  "publisher": "stecik",
   "version": "0.0.1",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/stecik/vscode_django_commands"
+  },
   "engines": {
     "vscode": "^1.102.0"
   },
@@ -25,7 +30,29 @@
         "command": "django-commands.reload",
         "title": "Django Commands: Reload"
       }
-    ]
+    ],
+    "configuration": {
+      "title": "Django Commands",
+      "properties": {
+        "djangoCommands.maxRecentCommands": {
+          "type": "number",
+          "default": 5,
+          "minimum": 1,
+          "maximum": 15,
+          "description": "Maximum number of recent Django commands to store."
+        },
+        "djangoCommands.showRecentCommands": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show recently used Django commands"
+        },
+        "djangoCommands.alwaysOpenNewTerminal": {
+          "type": "boolean",
+          "default": false,
+          "description": "Open new terminal window when command is run"
+        }
+      }
+    }
   },
   "scripts": {
     "lint": "eslint .",
