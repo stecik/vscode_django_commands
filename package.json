@@ -1,9 +1,9 @@
 {
-  "name": "django-commands",
-  "displayName": "Django Commands",
+  "name": "django-commands-easily",
+  "displayName": "Django Commands Easily",
   "description": "Extension to easily run and debug django commands",
   "publisher": "stecik",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "repository": {
     "type": "git",
     "url": "https://github.com/stecik/vscode_django_commands"
@@ -14,7 +14,11 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
+  "activationEvents": [
+    "onCommand:django-commands.run",
+    "onCommand:django-commands.debug",
+    "onCommand:django-commands.reload"
+  ],
   "main": "./extension.js",
   "contributes": {
     "commands": [
@@ -60,11 +64,15 @@
     "test": "vscode-test"
   },
   "devDependencies": {
-    "@types/vscode": "^1.102.0",
     "@types/mocha": "^10.0.10",
     "@types/node": "20.x",
-    "eslint": "^9.25.1",
+    "@types/vscode": "^1.102.0",
     "@vscode/test-cli": "^0.0.11",
-    "@vscode/test-electron": "^2.5.2"
+    "@vscode/test-electron": "^2.5.2",
+    "eslint": "^9.25.1"
+  },
+  "dependencies": {
+    "child_process": "^1.0.2",
+    "fs": "^0.0.1-security"
   }
 }

@@ -4,7 +4,6 @@
 const vscode = require("vscode");
 const fs = require("fs");
 const { exec } = require("child_process");
-const path = require("path");
 const config = vscode.workspace.getConfiguration("djangoCommands");
 const maxRecent = config.get("maxRecentCommands", 5);
 const showRecent = config.get("showRecentCommands", true);
@@ -19,7 +18,7 @@ const openNewTerminal = config.get("alwaysOpenNewTerminal", true);
 
 let workingDir;
 let pythonInterpreter;
-let managePy;
+let managePy = "";
 let commands;
 let recentCommands;
 
@@ -43,11 +42,29 @@ function parseDjangoCommands(text) {
     return result;
 }
 
+// async function getPythonInterpreter() {
+//     const pythonExt = vscode.extensions.getExtension("ms-python.python");
+
+//     if (!pythonExt) {
+//         vscode.window.showErrorMessage("Python extension not found");
+//         return;
+//     }
+
+//     if (!pythonExt.isActive) {
+//         await pythonExt.activate();
+//     }
+
+//     const pythonAPI = pythonExt.exports;
+//     const interpreterPath =
+//         pythonAPI.environments.getActiveEnvironmentPath().path;
+//     return interpreterPath;
+// }
+
 async function getPythonInterpreter() {
     const pythonExt = vscode.extensions.getExtension("ms-python.python");
 
     if (!pythonExt) {
-        vscode.window.showErrorMessage("Python extension not found");
+        vscode.window.showErrorMessage("Python extension not found.");
         return;
     }
 
@@ -56,10 +73,20 @@ async function getPythonInterpreter() {
     }
 
     const pythonAPI = pythonExt.exports;
-    const interpreterPath =
-        pythonAPI.environments.getActiveEnvironmentPath().path;
-    return interpreterPath;
+
+    // Modern API (2024.23+)
+    if (pythonAPI?.environments?.getActiveEnvironmentPath) {
+        return pythonAPI.environments.getActiveEnvironmentPath().path;
+    }
+
+    // Legacy fallback (pre-2024)
+    if (pythonAPI.settings) {
+        return pythonAPI.settings.getExecutionDetails().execCommand?.[0];
+    }
+
+    vscode.window.showErrorMessage("Unable to determine Python interpreter.");
 }
+
 
 async function findManagePy() {
     const files = await vscode.workspace.findFiles(
@@ -218,10 +245,6 @@ async function activate(context) {
     recentCommands = new Set(context.globalState.get("recentCommands", []));
     workingDir = vscode.workspace.workspaceFolders[0].uri.fsPath;
     pythonInterpreter = await getPythonInterpreter();
-    managePy = await findManagePy();
-    if (!managePy) {
-        return;
-    }
     commands = await getDjangoCommands();
 
     let cmd = vscode.commands.registerCommand("django-commands.run", () => {
@@ -241,7 +264,7 @@ async function activate(context) {
 }
 
 // This method is called when your extension is deactivated
-function deactivate() {}
+function deactivate() { }
 
 module.exports = {
     activate,
