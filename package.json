@@ -3,7 +3,7 @@
   "displayName": "Django Commands Easily",
   "description": "Extension to easily run and debug django commands",
   "publisher": "stecik",
-  "version": "0.0.2",
+  "version": "1.0.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/stecik/vscode_django_commands"
