@@ -50,6 +50,10 @@ You can access the following from the Command Palette (`Ctrl+Shift+P` or `Cmd+Sh
 
 ## 📝 Release Notes
 
+### 1.0.1
+
+- Added logo
+
 ### 1.0.0
 
 -   All `manage.py` files in the workspace are found and commands are grouped by project
@@ -60,22 +64,6 @@ You can access the following from the Command Palette (`Ctrl+Shift+P` or `Cmd+Sh
 -   Fixed: cancelling the picker closed the active terminal
 -   Fixed: debugging a command without arguments failed
 -   Fixed: settings changes were applied only after reload
-
-### 0.0.2
-
--   Support for Python extension API before 2024.23 (Python 2.7 projects)
--   Bug fixes
-
-### 0.0.1
-
--   Initial release:
-    -   Command grouping
-    -   Terminal execution
-    -   Debug mode
-    -   Recent command tracking
-    -   Configurable settings
-
----
 
 ## 🙌 Contributing
 
