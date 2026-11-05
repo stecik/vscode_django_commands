@@ -4,6 +4,10 @@ All notable changes to the "django-commands" extension will be documented in thi
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [1.0.1]
+
+- Added extension icon
+
 ## [1.0.0]
 
 - All `manage.py` files in the workspace are found and commands are grouped by project
